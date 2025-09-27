@@ -5,16 +5,16 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../theme.dart';
-import 'kyc_driving.dart';
 
-class AadharKycScreen extends StatefulWidget {
-  const AadharKycScreen({super.key});
+class DrivingLicenseKycScreen extends StatefulWidget {
+  const DrivingLicenseKycScreen({super.key});
 
   @override
-  State<AadharKycScreen> createState() => _AadharKycScreenState();
+  State<DrivingLicenseKycScreen> createState() =>
+      _DrivingLicenseKycScreenState();
 }
 
-class _AadharKycScreenState extends State<AadharKycScreen> {
+class _DrivingLicenseKycScreenState extends State<DrivingLicenseKycScreen> {
   String? _fileName;
   File? _selectedFile;
   bool _isVerified = false;
@@ -38,7 +38,9 @@ class _AadharKycScreenState extends State<AadharKycScreen> {
   Future<void> _verifyFile() async {
     if (_selectedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please upload Aadhaar PDF first")),
+        const SnackBar(
+          content: Text("Please upload Driving License PDF first"),
+        ),
       );
       return;
     }
@@ -49,11 +51,11 @@ class _AadharKycScreenState extends State<AadharKycScreen> {
 
     try {
       final baseUrl = dotenv.env['API_BASE_URL'] ?? "";
-      final url = Uri.parse("$baseUrl/verify");
+      final url = Uri.parse("$baseUrl/verify-license");
 
       var request = http.MultipartRequest('POST', url);
       request.files.add(
-        await http.MultipartFile.fromPath('aadhar_pdf', _selectedFile!.path),
+        await http.MultipartFile.fromPath('license_pdf', _selectedFile!.path),
       );
 
       var response = await request.send();
@@ -71,8 +73,8 @@ class _AadharKycScreenState extends State<AadharKycScreen> {
           SnackBar(
             content: Text(
               verified
-                  ? "Aadhaar PDF Verified Successfully!"
-                  : "Aadhaar Verification Failed!",
+                  ? "Driving License PDF Verified Successfully!"
+                  : "Driving License Verification Failed!",
             ),
           ),
         );
@@ -95,7 +97,9 @@ class _AadharKycScreenState extends State<AadharKycScreen> {
   Future<void> _submitFile() async {
     if (_selectedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please upload Aadhaar PDF first")),
+        const SnackBar(
+          content: Text("Please upload Driving License PDF first"),
+        ),
       );
       return;
     }
@@ -106,27 +110,24 @@ class _AadharKycScreenState extends State<AadharKycScreen> {
 
     try {
       final baseUrl = dotenv.env['API_BASE_URL'] ?? "";
-      final url = Uri.parse("$baseUrl/submit");
+      final url = Uri.parse("$baseUrl/submit-license");
 
       var request = http.MultipartRequest('POST', url);
       request.files.add(
-        await http.MultipartFile.fromPath('aadhar_pdf', _selectedFile!.path),
+        await http.MultipartFile.fromPath('license_pdf', _selectedFile!.path),
       );
 
       var response = await request.send();
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("✅ Aadhaar Submitted Successfully!")),
+          const SnackBar(
+            content: Text("🎉 All KYC Verifications Completed Successfully!"),
+          ),
         );
 
         Future.delayed(const Duration(seconds: 2), () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const DrivingLicenseKycScreen(),
-            ),
-          );
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
         });
       } else {
         ScaffoldMessenger.of(
@@ -148,7 +149,7 @@ class _AadharKycScreenState extends State<AadharKycScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Aadhaar KYC"),
+        title: const Text("Driving License KYC"),
         backgroundColor: AppTheme.primaryColor,
         foregroundColor: AppTheme.onPrimary,
       ),
@@ -161,7 +162,7 @@ class _AadharKycScreenState extends State<AadharKycScreen> {
               ElevatedButton.icon(
                 onPressed: _isLoading ? null : _pickFile,
                 icon: const Icon(Icons.upload_file),
-                label: const Text("Upload Aadhaar PDF"),
+                label: const Text("Upload Driving License PDF"),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                 ),

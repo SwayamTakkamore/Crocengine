@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import '../theme.dart';
 
 class CrocodileGlowLoader extends StatefulWidget {
   final String crocodileAsset;
@@ -12,7 +13,7 @@ class CrocodileGlowLoader extends StatefulWidget {
     required this.crocodileAsset,
     this.size = 150,
     this.crocodileSize = 40,
-    this.glowColor = Colors.pink,
+    this.glowColor = AppTheme.emerald,
   });
 
   @override
@@ -108,8 +109,8 @@ class GlowingArcPainter extends CustomPainter {
       endAngle: 2 * math.pi,
       colors: [
         Colors.transparent,
-        color.withOpacity(0.2),
-        color.withOpacity(0.9),
+        color.withValues(alpha: 0.2),
+        color.withValues(alpha: 0.9),
       ],
       stops: const [0.2, 0.6, 1.0],
       transform: GradientRotation(2 * math.pi * progress),
