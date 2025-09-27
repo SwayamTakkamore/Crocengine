@@ -100,7 +100,7 @@ async def submit_pan(pan_image: UploadFile = File(...), pan_number: str = Form(.
     }
 
 @app.post("/submit/passport")
-async def submit_passport(passport_number: str):
+async def submit_passport(passport_number: str = Form(...)):
     """Submit verified passport information"""
     return {
         "msg": "Passport information submitted successfully", 

@@ -148,14 +148,13 @@ class _KycPassportScreenState extends State<KycPassportScreen> {
           if (jsonData['extracted_info'] != null) {
             var info = jsonData['extracted_info'];
             _extractedInfo = '''
-Extracted Information:
-• Full Name: ${info['full_name'] ?? 'N/A'}
-• Passport Number: ${info['passport_number'] ?? 'N/A'}
-• Country: ${info['country'] ?? 'N/A'}
-• Nationality: ${info['nationality'] ?? 'N/A'}
-• Date of Birth: ${info['date_of_birth'] ?? 'N/A'}
-• Expiry Date: ${info['expiry_date'] ?? 'N/A'}
-• Sex: ${info['sex'] ?? 'N/A'}
+              Extracted Information:
+              • Full Name: ${info['full_name'] ?? 'N/A'}
+              • Country: ${info['country'] ?? 'N/A'}
+              • Nationality: ${info['nationality'] ?? 'N/A'}
+              • Date of Birth: ${info['date_of_birth'] ?? 'N/A'}
+              • Expiry Date: ${info['expiry_date'] ?? 'N/A'}
+              • Sex: ${info['sex'] ?? 'N/A'}
             ''';
 
             // Auto-fill fields from extracted data
@@ -234,15 +233,24 @@ Extracted Information:
         body: {'passport_number': _passportController.text},
       );
 
+      print("Passport Submission Response - Status: ${response.statusCode}");
+      print("Passport Submission Response - Body: ${response.body}");
+
       if (response.statusCode == 200) {
-        _showSuccess('Passport information submitted successfully!');
+        final data = jsonDecode(response.body);
+        _showSuccess(data['msg'] ?? 'Passport information submitted successfully!');
+
+        // Cache the successful submission
+        await _cacheService.markDocumentVerified('passport');
 
         // Navigate to next screen (Email verification)
         if (mounted) {
           Navigator.of(context).pushReplacementNamed('/kyc-email');
         }
       } else {
-        _showError('Failed to submit passport information');
+        print("Passport Submission Error - Status: ${response.statusCode}");
+        print("Response body: ${response.body}");
+        _showError('Failed to submit passport information (${response.statusCode})');
       }
     } catch (e) {
       _showError('Network error: $e');
