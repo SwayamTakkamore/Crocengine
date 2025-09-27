@@ -44,10 +44,22 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Environment variables - never commit these!
 .env
 *.env
 **/.env
 **/*.env
-**/**/.env
-*/*/.env
-*/*/*/.env
+
+# But allow example environment files
+!.env.example
+!*.env.example
+!**/.env.example
+!**/*.env.example
+
+# Specific environment files
+.environment
+.development.env
+.production.env
+.staging.env
+.test.env
+.local.env
