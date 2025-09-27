@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+easyocr
+opencv-python-headless
+pillow
+numpy
+fastapi
+deepface
+python-multipart
