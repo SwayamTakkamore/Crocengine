@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face KYC Verification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .verification-area {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #videoContainer {
+            position: relative;
+            display: inline-block;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        #video {
+            width: 400px;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .face-outline {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 250px;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transition: border-color 0.3s;
+        }
+
+        .face-outline.detected {
+            border-color: #4CAF50;
+        }
+
+        .instructions {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+        }
+
+        .current-instruction {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+
+        .movement-checklist {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .movement-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .movement-item.completed {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .movement-item .icon {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        .status-message {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #video {
+                width: 300px;
+                height: 225px;
+            }
+            
+            .face-outline {
+                width: 150px;
+                height: 187px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 Face KYC Verification</h1>
+        
+        <div class="verification-area">
+            <div id="videoContainer">
+                <video id="video" autoplay muted></video>
+                <div class="overlay">
+                    <div class="face-outline" id="faceOutline"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <div class="current-instruction" id="currentInstruction">
+                Click "Start Verification" to begin
+            </div>
+            <div id="instructionText">
+                Position your face in the circle and follow the instructions
+            </div>
+        </div>
+
+        <div class="movement-checklist">
+            <div class="movement-item" id="centerMovement">
+                <span class="icon">👁️</span>
+                <span>Look Center</span>
+            </div>
+            <div class="movement-item" id="leftMovement">
+                <span class="icon">⬅️</span>
+                <span>Look Left</span>
+            </div>
+            <div class="movement-item" id="rightMovement">
+                <span class="icon">➡️</span>
+                <span>Look Right</span>
+            </div>
+            <div class="movement-item" id="upMovement">
+                <span class="icon">⬆️</span>
+                <span>Look Up</span>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+        </div>
+
+        <div id="statusMessage" class="status-message hidden"></div>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="startBtn" onclick="startVerification()">
+                Start Verification
+            </button>
+            <button class="btn btn-danger hidden" id="stopBtn" onclick="stopVerification()">
+                Stop
+            </button>
+        </div>
+    </div>
+
+    <script>
+        class FaceKYCVerification {
+            constructor() {
+                this.video = document.getElementById('video');
+                this.canvas = document.createElement('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.sessionId = null;
+                this.isVerifying = false;
+                this.stream = null;
+                this.frameInterval = null;
+                
+                this.movements = {
+                    center: false,
+                    left: false,
+                    right: false,
+                    up: false
+                };
+                
+                this.instructions = {
+                    center: "Look straight at the camera",
+                    left: "Slowly turn your head to the left",
+                    right: "Slowly turn your head to the right", 
+                    up: "Slowly look up",
+                    completed: "Verification completed! ✅"
+                };
+            }
+
+            async startCamera() {
+                try {
+                    this.stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            width: 640, 
+                            height: 480,
+                            facingMode: 'user'
+                        } 
+                    });
+                    this.video.srcObject = this.stream;
+                    
+                    this.canvas.width = 640;
+                    this.canvas.height = 480;
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Error accessing camera:', error);
+                    this.showMessage('Camera access denied. Please allow camera access and try again.', 'error');
+                    return false;
+                }
+            }
+
+            stopCamera() {
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+                }
+            }
+
+            async startVerificationSession() {
+                try {
+                    const response = await fetch('/api/start-verification', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        this.sessionId = result.session_id;
+                        return true;
+                    } else {
+                        throw new Error(result.error);
+                    }
+                } catch (error) {
+                    console.error('Error starting verification:', error);
+                    this.showMessage('Failed to start verification session', 'error');
+                    return false;
+                }
+            }
+
+            captureFrame() {
+                this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+                return this.canvas.toDataURL('image/jpeg', 0.8);
+            }
+
+            async processFrame() {
+                if (!this.isVerifying || !this.sessionId) return;
+
+                try {
+                    const imageData = this.captureFrame();
+                    
+                    const response = await fetch('/api/process-frame', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            session_id: this.sessionId,
+                            image: imageData
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.updateUI(result.data);
+                    } else {
+                        console.error('Frame processing error:', result.error);
+                    }
+                } catch (error) {
+                    console.error('Error processing frame:', error);
+                }
+            }
+
+            updateUI(data) {
+                // Update face detection indicator
+                const faceOutline = document.getElementById('faceOutline');
+                if (data.face_detected) {
+                    faceOutline.classList.add('detected');
+                } else {
+                    faceOutline.classList.remove('detected');
+                }
+
+                // Update movement checklist
+                Object.keys(data.movements_completed).forEach(movement => {
+                    const element = document.getElementById(movement + 'Movement');
+                    if (element) {
+                        if (data.movements_completed[movement]) {
+                            element.classList.add('completed');
+                            this.movements[movement] = true;
+                        }
+                    }
+                });
+
+                // Update progress bar
+                const progressFill = document.getElementById('progressFill');
+                const progress = Math.round(data.progress || 0);
+                progressFill.style.width = progress + '%';
+                progressFill.textContent = progress + '%';
+
+                this.updateCurrentInstruction(data);
+
+                if (data.verification_complete) {
+                    this.completeVerification(data.is_verified);
+                }
+            }
+
+            updateCurrentInstruction(data) {
+                const instructionElement = document.getElementById('currentInstruction');
+                
+                if (data.verification_complete) {
+                    instructionElement.textContent = this.instructions.completed;
+                    return;
+                }
+
+                if (!data.face_detected) {
+                    instructionElement.textContent = "Please position your face in the circle";
+                    return;
+                }
+
+                const movements = data.movements_completed;
+                
+                if (!movements.center) {
+                    instructionElement.textContent = this.instructions.center;
+                } else if (!movements.left) {
+                    instructionElement.textContent = this.instructions.left;
+                } else if (!movements.right) {
+                    instructionElement.textContent = this.instructions.right;
+                } else if (!movements.up) {
+                    instructionElement.textContent = this.instructions.up;
+                } else {
+                    instructionElement.textContent = "Great! Almost done...";
+                }
+            }
+
+            completeVerification(isVerified) {
+                this.isVerifying = false;
+                clearInterval(this.frameInterval);
+                
+                const startBtn = document.getElementById('startBtn');
+                const stopBtn = document.getElementById('stopBtn');
+                
+                startBtn.classList.remove('hidden');
+                stopBtn.classList.add('hidden');
+                
+                if (isVerified) {
+                    this.showMessage('✅ Verification Successful! You have been verified as a real person.', 'success');
+                    startBtn.textContent = 'Start New Verification';
+                } else {
+                    this.showMessage('❌ Verification Failed. Please try again.', 'error');
+                    startBtn.textContent = 'Try Again';
+                }
+                
+                this.resetMovements();
+            }
+
+            resetMovements() {
+                this.movements = {
+                    center: false,
+                    left: false,
+                    right: false,
+                    up: false
+                };
+                
+                document.querySelectorAll('.movement-item').forEach(item => {
+                    item.classList.remove('completed');
+                });
+                
+                const progressFill = document.getElementById('progressFill');
+                progressFill.style.width = '0%';
+                progressFill.textContent = '0%';
+            }
+
+            showMessage(message, type) {
+                const messageEl = document.getElementById('statusMessage');
+                messageEl.textContent = message;
+                messageEl.className = `status-message status-${type}`;
+                messageEl.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    messageEl.classList.add('hidden');
+                }, 5000);
+            }
+
+            async start() {
+                const cameraStarted = await this.startCamera();
+                if (!cameraStarted) return false;
+
+                const sessionStarted = await this.startVerificationSession();
+                if (!sessionStarted) return false;
+
+                this.isVerifying = true;
+                
+                this.frameInterval = setInterval(() => {
+                    this.processFrame();
+                }, 200);
+
+                return true;
+            }
+
+            stop() {
+                this.isVerifying = false;
+                if (this.frameInterval) {
+                    clearInterval(this.frameInterval);
+                    this.frameInterval = null;
+                }
+                this.stopCamera();
+                this.resetMovements();
+            }
+        }
+
+        const verifier = new FaceKYCVerification();
+
+        async function startVerification() {
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            
+            startBtn.disabled = true;
+            startBtn.textContent = 'Starting...';
+            
+            const success = await verifier.start();
+            
+            if (success) {
+                startBtn.classList.add('hidden');
+                stopBtn.classList.remove('hidden');
+                verifier.showMessage('Verification started! Follow the instructions.', 'info');
+            } else {
+                startBtn.disabled = false;
+                startBtn.textContent = 'Start Verification';
+            }
+        }
+
+        function stopVerification() {
+            verifier.stop();
+            
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            
+            startBtn.classList.remove('hidden');
+            stopBtn.classList.add('hidden');
+            startBtn.disabled = false;
+            startBtn.textContent = 'Start Verification';
+            
+            verifier.showMessage('Verification stopped.', 'info');
+        }
+
+        window.addEventListener('beforeunload', () => {
+            verifier.stop();
+        });
+    </script>
+</body>
+</html>
