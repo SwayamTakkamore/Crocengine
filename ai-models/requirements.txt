@@ -4,6 +4,7 @@ easyocr
 opencv-python-headless
 pillow
 numpy
-fastapi
 deepface
 python-multipart
+httpx
+python-dotenv
