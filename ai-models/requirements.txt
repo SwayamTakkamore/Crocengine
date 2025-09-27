@@ -8,3 +8,5 @@ deepface
 python-multipart
 httpx
 python-dotenv
+passporteye
+pytesseract

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'theme.dart';
-import 'screens/kyc_aadhar.dart';
-import 'screens/kyc_driving.dart';
+import 'screens/kyc_pan.dart';
+import 'screens/kyc_passport.dart';
+import 'screens/kyc_email.dart';
+import 'screens/developer_testing.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,8 +34,10 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const DashboardScreen(),
-        '/kyc-aadhar': (context) => const AadharKycScreen(),
-        '/kyc-driving': (context) => const DrivingLicenseKycScreen(),
+        '/kyc-pan': (context) => const PanKycScreen(),
+        '/kyc-passport': (context) => const KycPassportScreen(),
+        '/kyc-email': (context) => const EmailKycScreen(),
+        '/developer-testing': (context) => const DeveloperTestingScreen(),
       },
     );
   }
@@ -102,7 +106,7 @@ class DashboardScreen extends StatelessWidget {
         ),
         const SizedBox(height: 30),
         ElevatedButton.icon(
-          onPressed: () => Navigator.pushNamed(context, '/kyc-aadhar'),
+          onPressed: () => Navigator.pushNamed(context, '/kyc-pan'),
           icon: const Icon(Icons.rocket_launch),
           label: const Text('Get Started'),
           style: ElevatedButton.styleFrom(
@@ -113,6 +117,21 @@ class DashboardScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(15),
             ),
             elevation: 3,
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Developer Testing Button (REMOVE IN PRODUCTION)
+        OutlinedButton.icon(
+          onPressed: () => Navigator.pushNamed(context, '/developer-testing'),
+          icon: const Icon(Icons.bug_report),
+          label: const Text('🔧 Developer Testing'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppTheme.primaryColor,
+            minimumSize: const Size(double.infinity, 50),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            side: BorderSide(color: AppTheme.primaryColor, width: 2),
           ),
         ),
       ],
