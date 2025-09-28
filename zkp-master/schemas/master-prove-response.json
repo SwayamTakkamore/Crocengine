@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://crocengine.com/schemas/master-prove-response.json", 
+  "title": "Master Proof Generation Response",
+  "description": "Response format for successfully generated master ZK proofs",
+  "type": "object",
+  "required": [
+    "masterProof",
+    "publicSignals",
+    "commitment",
+    "session_id",
+    "timestamp"
+  ],
+  "properties": {
+    "masterProof": {
+      "type": "object",
+      "required": ["pi_a", "pi_b", "pi_c", "protocol", "curve"],
+      "properties": {
+        "pi_a": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "Proof element A (G1 point)"
+        },
+        "pi_b": {
+          "type": "array",
+          "items": {
+            "type": "array", 
+            "items": {"type": "string"},
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "Proof element B (G2 point)"
+        },
+        "pi_c": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 3, 
+          "maxItems": 3,
+          "description": "Proof element C (G1 point)"
+        },
+        "protocol": {
+          "type": "string",
+          "enum": ["groth16", "plonk"],
+          "description": "ZK proof protocol used"
+        },
+        "curve": {
+          "type": "string",
+          "enum": ["bn128", "bls12_381"],
+          "description": "Elliptic curve used for proof"
+        }
+      },
+      "additionalProperties": false
+    },
+    "publicSignals": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Public inputs (commitment root, policy hash, etc.) as field elements"
+    },
+    "commitment": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$", 
+      "description": "Root commitment hash anchoring all module verifications"
+    },
+    "nullifier": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$",
+      "description": "Nullifier for preventing double-spending/reuse"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Session ID from original request"
+    },
+    "timestamp": {
+      "type": "integer",
+      "description": "Unix timestamp when proof was generated"
+    },
+    "expiry": {
+      "type": "integer",
+      "description": "Unix timestamp when proof expires"
+    },
+    "policy_hash": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$",
+      "description": "Hash of the verification policy used"
+    },
+    "anchorTx": {
+      "type": "object",
+      "description": "On-chain anchor transaction (if requested)",
+      "properties": {
+        "txHash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "chainId": {
+          "type": "integer"
+        },
+        "blockNumber": {
+          "type": "integer"
+        },
+        "contractAddress": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "verification": {
+      "type": "object",
+      "description": "Verification metadata",
+      "properties": {
+        "verificationKey": {
+          "type": "string",
+          "description": "URL or hash of verification key used"
+        },
+        "circuitId": {
+          "type": "string",
+          "description": "Identifier of the circuit used for proof generation"
+        },
+        "modulesSatisfied": {
+          "type": "array",
+          "items": {"type": "string"}, 
+          "description": "List of module IDs that passed verification"
+        },
+        "policysSatisfied": {
+          "type": "boolean",
+          "description": "Whether all policy requirements were met"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

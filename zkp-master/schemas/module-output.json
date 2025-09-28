@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://crocengine.com/schemas/module-output.json",
+  "title": "Per-Module Verification Output",
+  "description": "Standard output format for individual identity verification modules",
+  "type": "object",
+  "required": [
+    "module_id",
+    "verification_flag", 
+    "commitment",
+    "signature",
+    "timestamp"
+  ],
+  "properties": {
+    "module_id": {
+      "type": "string",
+      "pattern": "^[a-z_]+_v[0-9]+$",
+      "description": "Unique module identifier with version",
+      "examples": ["pan_v1", "email_v1", "passport_v1", "dl_v1"]
+    },
+    "verification_flag": {
+      "type": "integer",
+      "enum": [0, 1],
+      "description": "Binary verification result: 0=failed, 1=passed"
+    },
+    "commitment": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{64}$",
+      "description": "Poseidon hash commitment of verification inputs and nonce"
+    },
+    "signature": {
+      "type": "string", 
+      "pattern": "^0x[0-9a-fA-F]{128,140}$",
+      "description": "Module's ECDSA signature over (module_id, verification_flag, commitment, timestamp)"
+    },
+    "timestamp": {
+      "type": "integer",
+      "minimum": 1000000000,
+      "maximum": 9999999999, 
+      "description": "Unix timestamp when verification was performed"
+    },
+    "proof": {
+      "type": "object",
+      "description": "Optional ZK proof object (snarkjs format)",
+      "properties": {
+        "pi_a": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "pi_b": {
+          "type": "array", 
+          "items": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        },
+        "pi_c": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "protocol": {
+          "type": "string",
+          "enum": ["groth16", "plonk"]
+        },
+        "curve": {
+          "type": "string", 
+          "enum": ["bn128", "bls12_381"]
+        }
+      }
+    },
+    "publicSignals": {
+      "type": "array",
+      "items": {"type": "string"},
+      "maxItems": 10,
+      "description": "Public inputs to the ZK circuit (field elements as hex strings)"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Module-specific metadata (scores, confidence, etc.)",
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Confidence score of verification (0.0 to 1.0)"
+        },
+        "risk_flags": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Risk indicators detected during verification"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
