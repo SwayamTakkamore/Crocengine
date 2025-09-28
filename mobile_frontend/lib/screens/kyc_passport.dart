@@ -238,7 +238,9 @@ class _KycPassportScreenState extends State<KycPassportScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        _showSuccess(data['msg'] ?? 'Passport information submitted successfully!');
+        _showSuccess(
+          data['msg'] ?? 'Passport information submitted successfully!',
+        );
 
         // Cache the successful submission
         await _cacheService.markDocumentVerified('passport');
@@ -250,7 +252,9 @@ class _KycPassportScreenState extends State<KycPassportScreen> {
       } else {
         print("Passport Submission Error - Status: ${response.statusCode}");
         print("Response body: ${response.body}");
-        _showError('Failed to submit passport information (${response.statusCode})');
+        _showError(
+          'Failed to submit passport information (${response.statusCode})',
+        );
       }
     } catch (e) {
       _showError('Network error: $e');
