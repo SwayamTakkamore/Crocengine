@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://crocengine.com/schemas/master-prove-request.json",
+  "title": "Master Proof Generation Request",
+  "description": "Request format for generating master ZK proofs from module outputs",
+  "type": "object",
+  "required": [
+    "session_id",
+    "modules", 
+    "policy"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]+$",
+      "minLength": 8,
+      "maxLength": 64,
+      "description": "Unique session identifier for tracking and anti-replay"
+    },
+    "modules": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "$ref": "module-output.json"
+      },
+      "description": "Array of per-module verification outputs"
+    },
+    "policy": {
+      "type": "object",
+      "required": ["required"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1,
+          "description": "List of module IDs that must have verification_flag=1"
+        },
+        "threshold": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Minimum number of modules that must pass (if not all required)"
+        },
+        "optional": {
+          "type": "array", 
+          "items": {"type": "string"},
+          "description": "List of optional module IDs that can contribute to threshold"
+        },
+        "weights": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z_]+_v[0-9]+$": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "description": "Per-module weights for threshold calculations"
+        }
+      },
+      "additionalProperties": false
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "anchor_on_chain": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to anchor commitment on blockchain"
+        },
+        "chain_id": {
+          "type": "integer",
+          "description": "Target blockchain ID for anchoring"
+        },
+        "nullifier_seed": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$",
+          "description": "Optional nullifier seed for unlinkability"
+        },
+        "expiry_minutes": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 1440,
+          "default": 60,
+          "description": "Proof validity window in minutes"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

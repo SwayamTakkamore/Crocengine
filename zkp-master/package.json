@@ -1,0 +1,53 @@
+{
+  "name": "zkp-master",
+  "version": "0.1.0",
+  "description": "ZKP Master Module for privacy-preserving identity verification",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "install:circom": "curl -L https://github.com/iden3/circom/releases/latest/download/circom-linux-amd64 -o /usr/local/bin/circom && chmod +x /usr/local/bin/circom",
+    "circuit:compile": "node scripts/compile-circuits.js",
+    "circuit:setup": "node scripts/setup-keys.js",
+    "circuit:test": "node scripts/test-circuits.js",
+    "serve": "node src/server.js",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "mocha test/unit/**/*.test.js",
+    "test:integration": "mocha test/integration/**/*.test.js",
+    "dev": "nodemon src/server.js",
+    "build": "npm run circuit:compile && npm run circuit:setup"
+  },
+  "dependencies": {
+    "@fastify/cors": "^8.4.0",
+    "@fastify/multipart": "^8.0.0",
+    "ajv": "^8.12.0",
+    "circom_runtime": "^0.1.25",
+    "circomlib": "^2.0.5",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.8.1",
+    "fastify": "^4.24.3",
+    "ffjavascript": "^0.2.63",
+    "poseidon-lite": "^0.2.0",
+    "snarkjs": "^0.7.3",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
+    "nodemon": "^3.0.1",
+    "supertest": "^6.3.3"
+  },
+  "keywords": [
+    "zero-knowledge",
+    "privacy",
+    "identity",
+    "verification",
+    "zkp",
+    "circom",
+    "snark"
+  ],
+  "author": "CrocEngine Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
