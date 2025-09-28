@@ -65,6 +65,14 @@ CrocEngine enables:
 
 ---
 
+## Presentation
+
+📊 **Project Presentation**: [View our detailed project presentation](./ppt/CrocEngine.pdf)
+
+*The presentation covers our solution architecture, technical implementation, market analysis, and demo of the CrocEngine platform.*
+
+---
+
 ## Vision
 
 CrocEngine aims to become the **Automated Compliance Copilot** for the Web3 ecosystem—bridging regulatory needs with **decentralization, privacy, and efficiency**.
